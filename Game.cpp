@@ -154,7 +154,7 @@ void Game::sMovement()
 {
 	for (auto& e : m_eManager.getEntities())
 	{
-		e->cShape->circle.rotate(3);
+		e->cShape->circle.rotate(5);
 		vec2 newPos = e->cTransform->pos + e->cTransform->velocity;
 
 		float radius = e->cShape->circle.getRadius();
@@ -197,7 +197,7 @@ void Game::sUserInput()
 	}
 	if (ip->shoot)
 	{
-		vec2 mousePos (sf::Mouse::getPosition(m_window).x, sf::Mouse::getPosition(m_window).y) ;
+		vec2 mousePos(sf::Mouse::getPosition(m_window).x, sf::Mouse::getPosition(m_window).y);
 		spawnBullet(m_player, mousePos);
 		ip->shoot = false;
 	}
@@ -206,8 +206,38 @@ void Game::sUserInput()
 
 void Game::sLifeSpan()
 {
-	for (auto& e : m_eManager.getEntitiesWithTag("bullet"))
+	const EntityVec
+		& bullets = m_eManager.getEntitiesWithTag("bullet"),
+		& fragments = m_eManager.getEntitiesWithTag("fragment");
+
+	for (int i = 0; i < bullets.size(); i++)
 	{
+		auto& e = bullets[i];
+
+		int& rem = e->cLifeSpan->remaining;
+		int& total = e->cLifeSpan->total;
+		auto& circle = e->cShape->circle;
+
+		std::cout << rem << " " << total << std::endl;
+
+		float newAlpha = 255 * ((float)rem) / total;
+
+		sf::Color currFillColor = circle.getFillColor();
+		currFillColor.a = newAlpha;
+		circle.setFillColor(currFillColor);
+
+		sf::Color currOutlineColor = circle.getOutlineColor();
+		currOutlineColor.a = newAlpha;
+		circle.setOutlineColor(currOutlineColor);
+
+		if (rem == 0) e->destroy();
+		else rem--;
+	}
+
+	for (int i = 0; i < fragments.size(); i++)
+	{
+		auto& e = fragments[i];
+
 		int& rem = e->cLifeSpan->remaining;
 		int& total = e->cLifeSpan->total;
 		auto& circle = e->cShape->circle;
@@ -251,16 +281,28 @@ void Game::sEnemySpawner()
 
 void Game::sCollision()
 {
-	for (auto& bullet : m_eManager.getEntitiesWithTag("bullet"))
+	float pRadius = m_player->cCollision->collisionRadius;
+
+	for (auto& enemy : m_eManager.getEntitiesWithTag("enemy"))
 	{
-		for (auto& enemy : m_eManager.getEntitiesWithTag("enemy"))
+
+		float eRadius = enemy->cCollision->collisionRadius;
+		if (m_player->cTransform->pos.distSq(enemy->cTransform->pos) < pRadius * pRadius + eRadius * eRadius)
+		{
+			enemy->destroy();
+			m_player->destroy();
+			spawnSmallEnemies(enemy);
+			spawnPlayer();
+		}
+
+		for (auto& bullet : m_eManager.getEntitiesWithTag("bullet"))
 		{
 			float bRadius = bullet->cCollision->collisionRadius;
-			float eRadius = enemy->cCollision->collisionRadius;
 			if (bullet->cTransform->pos.distSq(enemy->cTransform->pos) < bRadius * bRadius + eRadius * eRadius)
 			{
 				bullet->destroy();
 				enemy->destroy();
+				spawnSmallEnemies(enemy);
 			}
 		}
 	}
@@ -331,8 +373,38 @@ void Game::spawnEnemy()
 	e->cCollision = std::make_shared<CCollision>(enemyConfig.CollisionRadius);
 }
 
-void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
+void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 {
+	int pieces = enemy->cShape->circle.getPointCount(); // vertices
+
+	const int vertices = pieces;
+
+	float angleDifference = 360.0f / vertices;
+	float angle = 0;
+
+	auto& enemyCircle = enemy->cShape->circle;
+
+	while (pieces--)
+	{
+		std::shared_ptr<Entity>fragment = m_eManager.addEntity("fragment");
+		vec2 velocity(cos(angle), sin(angle));
+		velocity *= 2;
+
+		fragment->cTransform = std::make_shared<CTransform>(enemy->cTransform->pos, velocity, 0);
+
+		fragment->cShape = std::make_shared<CShape>
+			(
+				enemyCircle.getRadius() / (2),
+				vertices,
+				enemyCircle.getFillColor(),
+				enemyCircle.getOutlineColor(),
+				enemyCircle.getOutlineThickness()
+			);
+		//std::cout << "SMLLL lifespan: " << enemyConfig.SmallPartLifespan << std::endl;
+		fragment->cLifeSpan = std::make_shared<CLifeSpan>(enemyConfig.SmallPartLifespan);
+
+		angle += angleDifference;
+	}
 }
 
 void Game::spawnBullet(std::shared_ptr<Entity> srcEty, const vec2& destPos)

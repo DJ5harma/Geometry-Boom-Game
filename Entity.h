@@ -1,1 +1,29 @@
 #pragma once
+#include <string>
+#include <memory>
+#include "Components.h"
+#include "EntityManager.h"
+
+class Entity
+{
+	friend class EntityManager;
+
+	size_t m_id;
+	std::string m_tag = "default"; // player | enemy | bullet
+	bool m_alive;
+
+	Entity(size_t id, std::string& tag) : m_id(id), m_tag(tag), m_alive(true) {};
+
+public:
+	std::shared_ptr  <CTransform>   cTransform;
+	std::shared_ptr  <CShape>       cShape;
+	std::shared_ptr  <CCollision>   cCollision;
+	std::shared_ptr  <CScore>		cScore;
+	std::shared_ptr  <CLifeSpan>    cLifeSpan;
+	std::shared_ptr  <CInput>	    cInput;
+
+	const size_t getId() const;
+	const std::string& getTag() const;
+	bool isAlive() const;
+	void destroy();
+};

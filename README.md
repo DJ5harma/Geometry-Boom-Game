@@ -11,3 +11,10 @@ and run GeometryBoomGame.exe file.
 To modify its configurations and see what happens, go to gameConfig.txt file.
 Please modify with care after reading the instructions provided in the file itself.
 Otherwise the executable will fail to parse the file and crash.
+
+### Controls:
+
+WASD & Up Left Down Right supported.
+P : pause the game.
+Left Mouse Click: Shoot
+Esc : Exit the game

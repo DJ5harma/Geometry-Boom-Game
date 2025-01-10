@@ -9,132 +9,140 @@ constexpr auto PI = 3.14159;
 
 inline static int randomInt(int a, int b)
 {
-    static bool seeded = false;
-    if (!seeded)
-    {
-        srand(time(0));  // Seed the random number generator once
-        seeded = true;
-    }
+	static bool seeded = false;
+	if (!seeded)
+	{
+		srand(time(0));  // Seed the random number generator once
+		seeded = true;
+	}
 
-    return a + rand() % (b - a + 1);  // Generate random number between a and b (inclusive)
+	return a + rand() % (b - a + 1);  // Generate random number between a and b (inclusive)
 }
 inline static float randomFloat(float a, float b)
 {
-    static bool seeded = false;
-    if (!seeded)
-    {
-        srand(time(0));  // Seed the random number generator once
-        seeded = true;
-    }
+	static bool seeded = false;
+	if (!seeded)
+	{
+		srand(time(0));  // Seed the random number generator once
+		seeded = true;
+	}
 
-    return a + static_cast<float>(rand()) / RAND_MAX * (b - a);  // Generate random float between a and b
+	return a + static_cast<float>(rand()) / RAND_MAX * (b - a);  // Generate random float between a and b
 }
 
-void Game::init(const std::string& configFile){
-	
-	std::ifstream iFile (configFile);
+void Game::init(const std::string& configFile) {
 
-    if (!iFile.is_open())
-    {
-        std::cerr << "Failed to open config file: " << configFile << std::endl;
-        return;
-    }
+	std::ifstream iFile(configFile);
 
-    std::string temp;
+	if (!iFile.is_open())
+	{
+		std::cerr << "Failed to open config file: " << configFile << std::endl;
+		return;
+	}
 
-    // window setup
+	std::string temp;
 
-    int window_width, window_height, fps, is_fullscreen;
-    iFile >> temp >> window_width >> window_height >> fps >> is_fullscreen;
-    m_window.create(sf::VideoMode(window_width, window_height), "Geometry Boom Game");
-    m_window.setFramerateLimit(fps);
+	// window setup
 
-    //std::cout << temp << ' ' << window_width << ' ' << window_height << ' ' << fps << ' ' << is_fullscreen;
+	int window_width, window_height, fps, is_fullscreen;
+	iFile >> temp >> window_width >> window_height >> fps >> is_fullscreen;
+	m_window.create(sf::VideoMode(window_width, window_height), "Geometry Boom Game");
+	m_window.setFramerateLimit(fps);
 
-
-    // font and text setup
-
-    std::string fontFile;
-    int fontSize, R, G, B;
-
-    iFile >> temp >> fontFile >> fontSize >> R >> G >> B;
-
-    m_font.loadFromFile(fontFile);
-    m_scoreText.setString("0");
-    m_scoreText.setFont(m_font);
-    m_scoreText.setCharacterSize(fontSize);
-    m_scoreText.setFillColor(sf::Color(R, G, B));
-
-    if (iFile.fail())
-    {
-        std::cerr << "Error reading configuration data" << std::endl;
-        return;
-    }
-
-    // Player config setup
-
-    iFile >> temp >> playerConfig.ShapeRadius >> playerConfig.CollisionRadius >> playerConfig.Speed >> R >> G >> B;
-    //std::cout<<' '<< temp <<' '<< playerConfig.ShapeRadius <<' '<< playerConfig.CollisionRadius <<' '<< playerConfig.Speed <<' '<< R <<' '<< G <<' '<< B;
-    playerConfig.FillColor = sf::Color(R, G, B);
-
-    iFile >> R >> G >> B;
-    //std::cout<<' '<< R <<' '<< G <<' '<< B;
-    playerConfig.OutlineColor = sf::Color(R, G, B);
-    iFile >> playerConfig.OutlineThickness >> playerConfig.ShapeVertices;
-    //std::cout<<' '<< playerConfig.OutlineThickness <<' '<< playerConfig.ShapeVertices;
+	//std::cout << temp << ' ' << window_width << ' ' << window_height << ' ' << fps << ' ' << is_fullscreen;
 
 
-    // Enemy config setup
+	// font and text setup
 
-    iFile >> temp >> enemyConfig.ShapeRadius >> enemyConfig.CollisionRadius >> enemyConfig.SpeedMin >> enemyConfig.SpeedMax >> R >> G >> B;
-    enemyConfig.OutlineColor = sf::Color(R, G, B);
-    iFile >> enemyConfig.OutlineThickness >> enemyConfig.ShapeVerticesMin >> enemyConfig.ShapeVerticesMax >> enemyConfig.SmallPartLifespan >> enemyConfig.SpawnInterval;
+	std::string fontFile;
+	int fontSize, R, G, B;
 
-    // Bullet config setup
+	iFile >> temp >> fontFile >> fontSize >> R >> G >> B;
 
-    iFile >> temp >> bulletConfig.ShapeRadius >> bulletConfig.CollisionRadius >> bulletConfig.Speed >> R >> G >> B;
-    bulletConfig.FillColor = sf::Color(R, G, B);
-    iFile >> R >> G >> B;
-    bulletConfig.OutlineColor = sf::Color(R, G, B);
-    iFile >> bulletConfig.OutlineThickness >> bulletConfig.ShapeVertices>> bulletConfig.Lifespan;
+	m_font.loadFromFile(fontFile);
+	m_scoreText.setString("0");
+	m_scoreText.setFont(m_font);
+	m_scoreText.setCharacterSize(fontSize);
+	m_scoreText.setFillColor(sf::Color(R, G, B));
 
-    iFile.close();
+	if (iFile.fail())
+	{
+		std::cerr << "Error reading configuration data" << std::endl;
+		return;
+	}
+
+	// Player config setup
+
+	iFile >> temp >> playerConfig.ShapeRadius >> playerConfig.CollisionRadius >> playerConfig.Speed >> R >> G >> B;
+	//std::cout<<' '<< temp <<' '<< playerConfig.ShapeRadius <<' '<< playerConfig.CollisionRadius <<' '<< playerConfig.Speed <<' '<< R <<' '<< G <<' '<< B;
+	playerConfig.FillColor = sf::Color(R, G, B);
+
+	iFile >> R >> G >> B;
+	//std::cout<<' '<< R <<' '<< G <<' '<< B;
+	playerConfig.OutlineColor = sf::Color(R, G, B);
+	iFile >> playerConfig.OutlineThickness >> playerConfig.ShapeVertices;
+	//std::cout<<' '<< playerConfig.OutlineThickness <<' '<< playerConfig.ShapeVertices;
+
+
+	// Enemy config setup
+
+	iFile >> temp >> enemyConfig.ShapeRadius >> enemyConfig.CollisionRadius >> enemyConfig.SpeedMin >> enemyConfig.SpeedMax >> R >> G >> B;
+	enemyConfig.OutlineColor = sf::Color(R, G, B);
+	iFile >> enemyConfig.OutlineThickness >> enemyConfig.ShapeVerticesMin >> enemyConfig.ShapeVerticesMax >> enemyConfig.SmallPartLifespan >> enemyConfig.SpawnInterval;
+
+	// Bullet config setup
+
+	iFile >> temp >> bulletConfig.ShapeRadius >> bulletConfig.CollisionRadius >> bulletConfig.Speed >> R >> G >> B;
+	bulletConfig.FillColor = sf::Color(R, G, B);
+	iFile >> R >> G >> B;
+	bulletConfig.OutlineColor = sf::Color(R, G, B);
+	iFile >> bulletConfig.OutlineThickness >> bulletConfig.ShapeVertices >> bulletConfig.Lifespan;
+
+	iFile.close();
 
 }
 
 void Game::run()
 {
-    spawnPlayer();
-    std::cout << m_window.getSize().x << " " << m_window.getSize().y << std::endl;
+	spawnPlayer();
+	std::cout << m_window.getSize().x << " " << m_window.getSize().y << std::endl;
 
 
-    while (m_window.isOpen())
-    {
-        m_window.clear();
-        sf::Event event;
-        while (m_window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-            {
-                m_window.close();
-                return;
-            }
-            if (event.type == sf::Event::KeyPressed)
-            {
-                auto &ip = m_player->cInput; 
-                int key = event.key.code;
-                if (key == sf::Keyboard::Up || key == sf::Keyboard::W) ip->up = true;
-                if (key == sf::Keyboard::Down || key == sf::Keyboard::S) ip->down = true;
-                if (key == sf::Keyboard::Left || key == sf::Keyboard::A) ip->left = true;
-                if (key == sf::Keyboard::Right|| key == sf::Keyboard::D) ip->right = true;
-            }
-        }
-        sEnemySpawner();
-        sUserInput();
-        sMovement();
-        sRender();
-        m_window.display();
-    }
+	while (m_window.isOpen())
+	{
+		m_window.clear();
+		sf::Event event;
+		while (m_window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+			{
+				m_window.close();
+				return;
+			}
+			else if (event.type == sf::Event::KeyPressed)
+			{
+				auto& ip = m_player->cInput;
+				int key = event.key.code;
+				if (key == sf::Keyboard::Up || key == sf::Keyboard::W) ip->up = true;
+				if (key == sf::Keyboard::Down || key == sf::Keyboard::S) ip->down = true;
+				if (key == sf::Keyboard::Left || key == sf::Keyboard::A) ip->left = true;
+				if (key == sf::Keyboard::Right || key == sf::Keyboard::D) ip->right = true;
+			}
+			else if (event.type == sf::Event::MouseButtonPressed)
+			{
+				auto& ip = m_player->cInput;
+				int key = event.key.code;
+				if (key == sf::Mouse::Left) ip->shoot = true;
+			}
+		}
+		m_eManager.update();
+		sEnemySpawner();
+		sUserInput();
+		sLifeSpan();
+		sMovement();
+		sRender();
+		m_window.display();
+	}
 }
 
 void Game::setPaused(bool b)
@@ -143,74 +151,95 @@ void Game::setPaused(bool b)
 
 void Game::sMovement()
 {
-    for (auto& e : m_eManager.getEntities())
-    {
-        e->cShape->circle.rotate(3);
-        vec2 newPos = e->cTransform->pos + e->cTransform->velocity;
+	for (auto& e : m_eManager.getEntities())
+	{
+		e->cShape->circle.rotate(3);
+		vec2 newPos = e->cTransform->pos + e->cTransform->velocity;
 
-        float radius = e->cShape->circle.getRadius();
+		float radius = e->cShape->circle.getRadius();
 
-        if (newPos.x - radius < 0 || newPos.x + radius > m_window.getSize().x) e->cTransform->velocity.x *= -1;
-        if (newPos.y - radius < 0 || newPos.y + radius > m_window.getSize().y) e->cTransform->velocity.y *= -1;
+		if (newPos.x - radius < 0 || newPos.x + radius > m_window.getSize().x) e->cTransform->velocity.x *= -1;
+		if (newPos.y - radius < 0 || newPos.y + radius > m_window.getSize().y) e->cTransform->velocity.y *= -1;
 
-        e->cTransform->pos = newPos;
+		e->cTransform->pos = newPos;
 
-        e->cShape->circle.setPosition(newPos.x, newPos.y);
+		e->cShape->circle.setPosition(newPos.x, newPos.y);
 
-    }
+	}
 }
 
 void Game::sUserInput()
 {
-    auto& ip = m_player->cInput;
-    auto& vel = m_player->cTransform->velocity;
-    auto& pos = m_player->cTransform->pos;
-    
-    if (ip->up)
-    {
-        vel.y = -playerConfig.Speed;
-        ip->up = false;
-    }
-    if (ip->down)
-    {
-        vel.y = +playerConfig.Speed;
-        ip->down = false;
-    }
-    if (ip->right)
-    {
-        vel.x = +playerConfig.Speed;
-        ip->right = false;
-    }
-    if (ip->left)
-    {
-        vel.x = -playerConfig.Speed;
-        ip->left = false;
-    }
+	auto& ip = m_player->cInput;
+	auto& vel = m_player->cTransform->velocity;
+	auto& pos = m_player->cTransform->pos;
+
+	if (ip->up)
+	{
+		vel.y = -playerConfig.Speed;
+		ip->up = false;
+	}
+	if (ip->down)
+	{
+		vel.y = +playerConfig.Speed;
+		ip->down = false;
+	}
+	if (ip->right)
+	{
+		vel.x = +playerConfig.Speed;
+		ip->right = false;
+	}
+	if (ip->left)
+	{
+		vel.x = -playerConfig.Speed;
+		ip->left = false;
+	}
+	if (ip->shoot)
+	{
+		vec2 mousePos (sf::Mouse::getPosition().x, sf::Mouse::getPosition().y) ;
+		spawnBullet(m_player, mousePos);
+		ip->shoot = false;
+	}
 
 }
 
 void Game::sLifeSpan()
 {
+	for (auto& e : m_eManager.getEntitiesWithTag("bullet"))
+	{
+		int& rem = e->cLifeSpan->remaining;
+		int& total = e->cLifeSpan->total;
+		auto& circle = e->cShape->circle;
+
+		std::cout << rem << " " << total << std::endl;
+
+		sf::Color currColor = circle.getFillColor();
+		currColor.a = ((float)rem) / total;
+		circle.setFillColor(currColor);
+
+		if (rem == 0) e->destroy();
+		else rem--;
+	}
 }
 
 void Game::sRender()
 {
-    for (auto& e : m_eManager.getEntities()){
-    
-        m_window.draw(e->cShape->circle);
-    }
+	for (auto& e : m_eManager.getEntities()) {
+
+		m_window.draw(e->cShape->circle);
+	}
 }
 
 void Game::sEnemySpawner()
 {
-    if (m_lastEnemySpawnTime != enemyConfig.SpawnInterval)
-    {
-        m_lastEnemySpawnTime++;
-        return;
-    }
+	if (m_lastEnemySpawnTime != enemyConfig.SpawnInterval)
+	{
+		m_lastEnemySpawnTime++;
+		return;
+	}
 
-    m_lastEnemySpawnTime = 0;
-    spawnEnemy();
+	m_lastEnemySpawnTime = 0;
+	spawnEnemy();
 }
 
 void Game::sCollision()
@@ -219,75 +248,92 @@ void Game::sCollision()
 
 void Game::spawnPlayer()
 {
-    
-    m_player = m_eManager.addEntity("player");
 
-    float speed = playerConfig.Speed;
-    
-    float angle = randomInt(0, 360);
-    float radians = (angle * PI) / 180;
-    vec2 velocity(speed * cosf(radians), speed * sinf(radians));
+	m_player = m_eManager.addEntity("player");
 
-    vec2 centerPos(m_window.getSize().x / 2, m_window.getSize().y / 2);
+	float speed = playerConfig.Speed;
 
-    m_player->cTransform = std::make_shared<CTransform>(centerPos, velocity, 0);
+	float angle = randomInt(0, 360);
+	float radians = (angle * PI) / 180;
+	vec2 velocity(speed * cosf(radians), speed * sinf(radians));
 
-    m_player->cShape = std::make_shared<CShape>
-    (
-        playerConfig.ShapeRadius, 
-        playerConfig.ShapeVertices,
-        playerConfig.FillColor, 
-        playerConfig.OutlineColor, 
-        playerConfig.OutlineThickness
-    );
+	vec2 centerPos(m_window.getSize().x / 2, m_window.getSize().y / 2);
 
-    m_player->cCollision = std::make_shared<CCollision>(playerConfig.CollisionRadius);
-    m_player->cInput = std::make_shared<CInput>();
+	m_player->cTransform = std::make_shared<CTransform>(centerPos, velocity, 0);
 
-    //std::cout << playerConfig.ShapeRadius << " " << playerConfig.ShapeVertices << " " << playerConfig.OutlineThickness;
+	m_player->cShape = std::make_shared<CShape>
+		(
+			playerConfig.ShapeRadius,
+			playerConfig.ShapeVertices,
+			playerConfig.FillColor,
+			playerConfig.OutlineColor,
+			playerConfig.OutlineThickness
+		);
+
+	m_player->cCollision = std::make_shared<CCollision>(playerConfig.CollisionRadius);
+	m_player->cInput = std::make_shared<CInput>();
+
+	//std::cout << playerConfig.ShapeRadius << " " << playerConfig.ShapeVertices << " " << playerConfig.OutlineThickness;
 
 
 }
 
 void Game::spawnEnemy()
 {
-    std::shared_ptr<Entity>e = m_eManager.addEntity("enemy");
+	std::shared_ptr<Entity>e = m_eManager.addEntity("enemy");
 
-    float speed = randomFloat(enemyConfig.SpeedMin, enemyConfig.SpeedMax);
-    
-    int radius = enemyConfig.ShapeRadius;
+	float speed = randomFloat(enemyConfig.SpeedMin, enemyConfig.SpeedMax);
 
-    float angle = randomInt(0, 360);
-    float radians = (angle * PI) / 180;
-    vec2 velocity(speed*cosf(radians), speed*sinf(radians));
+	int radius = enemyConfig.ShapeRadius;
 
-    vec2 randomPos(randomFloat(radius, m_window.getSize().x - radius), randomFloat(radius, m_window.getSize().y - radius));
+	float angle = randomInt(0, 360);
+	float radians = (angle * PI) / 180;
+	vec2 velocity(speed * cosf(radians), speed * sinf(radians));
 
-    e->cTransform = std::make_shared<CTransform>(randomPos, velocity, 0);
+	vec2 randomPos(randomFloat(radius, m_window.getSize().x - radius), randomFloat(radius, m_window.getSize().y - radius));
+
+	e->cTransform = std::make_shared<CTransform>(randomPos, velocity, 0);
 
 
-    int vertices = randomInt(enemyConfig.ShapeVerticesMin, enemyConfig.ShapeVerticesMax);
+	int vertices = randomInt(enemyConfig.ShapeVerticesMin, enemyConfig.ShapeVerticesMax);
 
-    int R = randomInt(100, 255), G = randomInt(100, 255), B = randomInt(100, 255);
+	int R = randomInt(100, 255), G = randomInt(100, 255), B = randomInt(100, 255);
 
-    e->cShape = std::make_shared<CShape>
-    (
-        enemyConfig.ShapeRadius, 
-        vertices, 
-        sf::Color(R, G, B), 
-        enemyConfig.OutlineColor, 
-        enemyConfig.OutlineThickness
-    );
+	e->cShape = std::make_shared<CShape>
+		(
+			enemyConfig.ShapeRadius,
+			vertices,
+			sf::Color(R, G, B),
+			enemyConfig.OutlineColor,
+			enemyConfig.OutlineThickness
+		);
 
-    e->cCollision = std::make_shared<CCollision>(enemyConfig.CollisionRadius);
+	e->cCollision = std::make_shared<CCollision>(enemyConfig.CollisionRadius);
 }
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
 {
 }
 
-void Game::spawnBullet(std::shared_ptr<Entity> player, const vec2& mousePos)
+void Game::spawnBullet(std::shared_ptr<Entity> srcEty, const vec2& destPos)
 {
+	std::shared_ptr<Entity>e = m_eManager.addEntity("bullet");
+
+	vec2 diffVec = (destPos - srcEty->cTransform->pos);
+	diffVec.normalize();
+	vec2 velocity = diffVec * bulletConfig.Speed;
+
+	e->cTransform = std::make_shared<CTransform>(srcEty->cTransform->pos, velocity, 0);
+	e->cShape = std::make_shared<CShape>
+		(
+			bulletConfig.ShapeRadius,
+			bulletConfig.ShapeVertices,
+			bulletConfig.FillColor,
+			bulletConfig.OutlineColor,
+			bulletConfig.OutlineThickness
+		);
+	e->cCollision = std::make_shared<CCollision>(bulletConfig.CollisionRadius);
+	e->cLifeSpan = std::make_shared<CLifeSpan>(bulletConfig.Lifespan);
 }
 
 void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)

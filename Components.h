@@ -19,8 +19,10 @@ public:
 	sf::CircleShape circle;
 	
 	CShape(float radius, int vertices, const sf::Color & fill, const sf::Color & outline, float thickness)
-		: circle(radius, vertices) 
+		//: circle(radius, vertices) 
 	{
+		circle.setRadius(radius);
+		circle.setPointCount(vertices);
 		circle.setFillColor(fill);
 		circle.setOutlineColor(outline);
 		circle.setOutlineThickness(thickness);

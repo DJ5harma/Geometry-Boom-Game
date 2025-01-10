@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include "vec2.h"
 #include <memory>
 #include "Entity.h"
@@ -28,6 +29,7 @@ struct EnemyConfig
 	int			ShapeVerticesMin;
 	int			ShapeVerticesMax;
 	int			SpawnInterval;
+	int			SmallPartLifespan;
 };
 
 struct BulletConfig 
@@ -39,15 +41,20 @@ struct BulletConfig
 	sf::Color   OutlineColor;
 	int			OutlineThickness;
 	int			ShapeVertices;
-	int			LifeSpan;
+	int			Lifespan;
 };
 
 class Game
 {
+
+	PlayerConfig playerConfig;
+	EnemyConfig enemyConfig;
+	BulletConfig bulletConfig;
+
 	sf::RenderWindow		m_window;
 	EntityManager			m_eManager;
 	sf::Font				m_font;
-	sf::Text				m_text;
+	sf::Text				m_scoreText;
 	int						m_score = 0;
 	int						m_currentFrame = 0;
 	int						m_lastEnemySpawnTime = 0;

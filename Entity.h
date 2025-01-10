@@ -3,8 +3,8 @@
 #include <memory>
 #include "Components.h"
 
-class EntityManager;
 class Game;
+class EntityManager;
 
 class Entity
 {
@@ -15,11 +15,12 @@ class Entity
 	std::string m_tag = "default"; // player | enemy | bullet
 	bool m_alive;
 
-public:
 	Entity(size_t id, const std::string& tag) : m_id(id), m_tag(tag), m_alive(true) {};
 
-	std::shared_ptr  <CTransform>   cTransform;
+public:
+
 	std::shared_ptr  <CShape>       cShape;
+	std::shared_ptr  <CTransform>   cTransform;
 	std::shared_ptr  <CCollision>   cCollision;
 	std::shared_ptr  <CScore>		cScore;
 	std::shared_ptr  <CLifeSpan>    cLifeSpan;

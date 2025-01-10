@@ -4,11 +4,11 @@
 #include <unordered_map>
 #include "Entity.h"
 
-class Game;
 
 typedef std::vector<std::shared_ptr<Entity>> EntityVec;
 typedef std::unordered_map<std::string, EntityVec> EntityMap;
 
+class Game;
 class EntityManager
 {
 	friend class Game;

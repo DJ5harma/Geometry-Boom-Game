@@ -119,12 +119,19 @@ void Game::run()
                 m_window.close();
                 return;
             }
+            if (event.type == sf::Event::KeyPressed)
+            {
+                auto &ip = m_player->cInput; 
+                int key = event.key.code;
+                if (key == sf::Keyboard::Up || key == sf::Keyboard::W) ip->up = true;
+                if (key == sf::Keyboard::Down || key == sf::Keyboard::S) ip->down = true;
+                if (key == sf::Keyboard::Left || key == sf::Keyboard::A) ip->left = true;
+                if (key == sf::Keyboard::Right|| key == sf::Keyboard::D) ip->right = true;
+            }
         }
         sEnemySpawner();
+        sUserInput();
         sMovement();
-        //std::cout << m_player.get()->cShape->circle.getRadius() << std::endl;
-        //m_window.draw(m_player->cShape->circle);
-
         sRender();
         m_window.display();
     }
@@ -155,6 +162,31 @@ void Game::sMovement()
 
 void Game::sUserInput()
 {
+    auto& ip = m_player->cInput;
+    auto& vel = m_player->cTransform->velocity;
+    auto& pos = m_player->cTransform->pos;
+    
+    if (ip->up)
+    {
+        vel.y = -playerConfig.Speed;
+        ip->up = false;
+    }
+    if (ip->down)
+    {
+        vel.y = +playerConfig.Speed;
+        ip->down = false;
+    }
+    if (ip->right)
+    {
+        vel.x = +playerConfig.Speed;
+        ip->right = false;
+    }
+    if (ip->left)
+    {
+        vel.x = -playerConfig.Speed;
+        ip->left = false;
+    }
+
 }
 
 void Game::sLifeSpan()
@@ -210,6 +242,7 @@ void Game::spawnPlayer()
     );
 
     m_player->cCollision = std::make_shared<CCollision>(playerConfig.CollisionRadius);
+    m_player->cInput = std::make_shared<CInput>();
 
     //std::cout << playerConfig.ShapeRadius << " " << playerConfig.ShapeVertices << " " << playerConfig.OutlineThickness;
 

@@ -46,7 +46,9 @@ void Game::init(const std::string& configFile) {
 
 	int window_width, window_height, fps, is_fullscreen;
 	iFile >> temp >> window_width >> window_height >> fps >> is_fullscreen;
-	m_window.create(sf::VideoMode(window_width, window_height), "Geometry Boom Game");
+
+	if(is_fullscreen) m_window.create(sf::VideoMode::getDesktopMode(), "Geometry Boom Game", sf::Style::Fullscreen);
+	else m_window.create(sf::VideoMode(window_width, window_height), "Geometry Boom Game");
 	m_window.setFramerateLimit(fps);
 
 	//std::cout << temp << ' ' << window_width << ' ' << window_height << ' ' << fps << ' ' << is_fullscreen;
@@ -127,6 +129,7 @@ void Game::run()
 				if (key == sf::Keyboard::Down || key == sf::Keyboard::S) ip->down = true;
 				if (key == sf::Keyboard::Left || key == sf::Keyboard::A) ip->left = true;
 				if (key == sf::Keyboard::Right || key == sf::Keyboard::D) ip->right = true;
+				if (key == sf::Keyboard::P) setPaused(!m_paused);
 			}
 			else if (event.type == sf::Event::MouseButtonPressed)
 			{
@@ -135,11 +138,15 @@ void Game::run()
 				if (key == sf::Mouse::Left) ip->shoot = true;
 			}
 		}
-		sEnemySpawner();
-		sUserInput();
-		sLifeSpan();
+
+		if (!m_paused)
+		{
+			sEnemySpawner();
+			sUserInput();
+			sLifeSpan();
+			sCollision();
+		}
 		sMovement();
-		sCollision();
 		m_eManager.update();
 		sRender();
 		m_window.display();
@@ -148,6 +155,8 @@ void Game::run()
 
 void Game::setPaused(bool b)
 {
+	//std::cout << "P pressed" << std::endl;
+	m_paused = b;
 }
 
 void Game::sMovement()
@@ -155,6 +164,8 @@ void Game::sMovement()
 	for (auto& e : m_eManager.getEntities())
 	{
 		e->cShape->circle.rotate(5);
+		if (m_paused) continue;
+
 		vec2 newPos = e->cTransform->pos + e->cTransform->velocity;
 
 		float radius = e->cShape->circle.getRadius();
@@ -218,7 +229,7 @@ void Game::sLifeSpan()
 		int& total = e->cLifeSpan->total;
 		auto& circle = e->cShape->circle;
 
-		std::cout << rem << " " << total << std::endl;
+		//std::cout << rem << " " << total << std::endl;
 
 		float newAlpha = 255 * ((float)rem) / total;
 

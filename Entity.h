@@ -12,7 +12,7 @@ class Entity
 	std::string m_tag = "default"; // player | enemy | bullet
 	bool m_alive;
 
-	Entity(size_t id, std::string& tag) : m_id(id), m_tag(tag), m_alive(true) {};
+	Entity(size_t id, const std::string& tag) : m_id(id), m_tag(tag), m_alive(true) {};
 
 public:
 	std::shared_ptr  <CTransform>   cTransform;

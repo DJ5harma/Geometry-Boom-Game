@@ -8,7 +8,6 @@ const size_t Entity::getId() const
 const std::string& Entity::getTag() const
 {
     return m_tag;
-    // TODO: insert return statement here
 }
 
 bool Entity::isAlive() const

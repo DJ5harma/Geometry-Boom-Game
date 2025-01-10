@@ -135,11 +135,12 @@ void Game::run()
 				if (key == sf::Mouse::Left) ip->shoot = true;
 			}
 		}
-		m_eManager.update();
 		sEnemySpawner();
 		sUserInput();
 		sLifeSpan();
 		sMovement();
+		sCollision();
+		m_eManager.update();
 		sRender();
 		m_window.display();
 	}
@@ -250,6 +251,19 @@ void Game::sEnemySpawner()
 
 void Game::sCollision()
 {
+	for (auto& bullet : m_eManager.getEntitiesWithTag("bullet"))
+	{
+		for (auto& enemy : m_eManager.getEntitiesWithTag("enemy"))
+		{
+			float bRadius = bullet->cCollision->collisionRadius;
+			float eRadius = enemy->cCollision->collisionRadius;
+			if (bullet->cTransform->pos.distSq(enemy->cTransform->pos) < bRadius * bRadius + eRadius * eRadius)
+			{
+				bullet->destroy();
+				enemy->destroy();
+			}
+		}
+	}
 }
 
 void Game::spawnPlayer()

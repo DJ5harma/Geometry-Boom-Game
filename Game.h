@@ -56,7 +56,7 @@ class Game
 	sf::Font				m_font;
 	sf::Text				m_scoreText;
 	int						m_score = 0;
-	int						m_currentFrame = 0;
+	//int						m_currentFrame = 0;
 	int						m_lastEnemySpawnTime = 0;
 	bool					m_paused = false;
 	bool					m_running = false;

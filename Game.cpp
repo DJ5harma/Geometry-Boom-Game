@@ -62,10 +62,11 @@ void Game::init(const std::string& configFile) {
 	iFile >> temp >> fontFile >> fontSize >> R >> G >> B;
 
 	m_font.loadFromFile(fontFile);
-	m_scoreText.setString("0");
+	//m_scoreText.setString("0");
 	m_scoreText.setFont(m_font);
 	m_scoreText.setCharacterSize(fontSize);
 	m_scoreText.setFillColor(sf::Color(R, G, B));
+	m_scoreText.setPosition(10, 10);
 
 	if (iFile.fail())
 	{
@@ -130,6 +131,7 @@ void Game::run()
 				if (key == sf::Keyboard::Left || key == sf::Keyboard::A) ip->left = true;
 				if (key == sf::Keyboard::Right || key == sf::Keyboard::D) ip->right = true;
 				if (key == sf::Keyboard::P) setPaused(!m_paused);
+				if (key == sf::Keyboard::Escape) m_window.close();
 			}
 			else if (event.type == sf::Event::MouseButtonPressed)
 			{
@@ -253,7 +255,7 @@ void Game::sLifeSpan()
 		int& total = e->cLifeSpan->total;
 		auto& circle = e->cShape->circle;
 
-		std::cout << rem << " " << total << std::endl;
+		//std::cout << rem << " " << total << std::endl;
 
 		float newAlpha = 255 * ((float)rem) / total;
 
@@ -272,6 +274,8 @@ void Game::sLifeSpan()
 
 void Game::sRender()
 {
+	m_scoreText.setString("Score: "+std::to_string(m_score));
+	m_window.draw(m_scoreText);
 	for (auto& e : m_eManager.getEntities()) {
 
 		m_window.draw(e->cShape->circle);
@@ -304,6 +308,7 @@ void Game::sCollision()
 			m_player->destroy();
 			spawnSmallEnemies(enemy);
 			spawnPlayer();
+			m_score = 0;
 		}
 
 		for (auto& bullet : m_eManager.getEntitiesWithTag("bullet"))
@@ -314,6 +319,7 @@ void Game::sCollision()
 				bullet->destroy();
 				enemy->destroy();
 				spawnSmallEnemies(enemy);
+				m_score++;
 			}
 		}
 	}

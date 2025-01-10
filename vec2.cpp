@@ -69,7 +69,7 @@ float vec2::distSq(const vec2& rhs) const
 
 void vec2::normalize()
 {
-	const float len = length();
+	const float len = sqrtf(x * x + y * y);
 	x /= len;
 	y /= len;
 }

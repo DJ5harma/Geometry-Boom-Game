@@ -196,7 +196,7 @@ void Game::sUserInput()
 	}
 	if (ip->shoot)
 	{
-		vec2 mousePos (sf::Mouse::getPosition().x, sf::Mouse::getPosition().y) ;
+		vec2 mousePos (sf::Mouse::getPosition(m_window).x, sf::Mouse::getPosition(m_window).y) ;
 		spawnBullet(m_player, mousePos);
 		ip->shoot = false;
 	}
@@ -213,9 +213,15 @@ void Game::sLifeSpan()
 
 		std::cout << rem << " " << total << std::endl;
 
-		sf::Color currColor = circle.getFillColor();
-		currColor.a = ((float)rem) / total;
-		circle.setFillColor(currColor);
+		float newAlpha = 255 * ((float)rem) / total;
+
+		sf::Color currFillColor = circle.getFillColor();
+		currFillColor.a = newAlpha;
+		circle.setFillColor(currFillColor);
+
+		sf::Color currOutlineColor = circle.getOutlineColor();
+		currOutlineColor.a = newAlpha;
+		circle.setOutlineColor(currOutlineColor);
 
 		if (rem == 0) e->destroy();
 		else rem--;
@@ -319,9 +325,9 @@ void Game::spawnBullet(std::shared_ptr<Entity> srcEty, const vec2& destPos)
 {
 	std::shared_ptr<Entity>e = m_eManager.addEntity("bullet");
 
-	vec2 diffVec = (destPos - srcEty->cTransform->pos);
-	diffVec.normalize();
-	vec2 velocity = diffVec * bulletConfig.Speed;
+	vec2 velocity = destPos - srcEty->cTransform->pos;
+	velocity.normalize();
+	velocity *= bulletConfig.Speed;
 
 	e->cTransform = std::make_shared<CTransform>(srcEty->cTransform->pos, velocity, 0);
 	e->cShape = std::make_shared<CShape>

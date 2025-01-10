@@ -2,19 +2,22 @@
 #include <string>
 #include <memory>
 #include "Components.h"
-#include "EntityManager.h"
+
+class EntityManager;
+class Game;
 
 class Entity
 {
 	friend class EntityManager;
+	friend class Game;
 
 	size_t m_id;
 	std::string m_tag = "default"; // player | enemy | bullet
 	bool m_alive;
 
+public:
 	Entity(size_t id, const std::string& tag) : m_id(id), m_tag(tag), m_alive(true) {};
 
-public:
 	std::shared_ptr  <CTransform>   cTransform;
 	std::shared_ptr  <CShape>       cShape;
 	std::shared_ptr  <CCollision>   cCollision;

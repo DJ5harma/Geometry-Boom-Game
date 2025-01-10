@@ -6,6 +6,8 @@ int main()
 {
     vec2 v1(20, 30), v2(40, 50);
 
+    v2 *= 2;
+    v2.print();
     (v1 + v2).print();
     (v1 - v2).print();
     (v1 * 100).print();
@@ -23,6 +25,7 @@ int main()
     v1.normalize();
     std::cout << v1.length() << std::endl;
     v1.print();
+
 
 
     return 0;

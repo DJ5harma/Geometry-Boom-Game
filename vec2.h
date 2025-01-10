@@ -23,7 +23,7 @@ public:
 	void operator /= (const float val);
 
 	float length() const;
-	float dist(const vec2 & rhs) const;
+	float dist(const vec2& rhs) const;
 	float distSq(const vec2& rhs) const; // skips sqrt to improve speed for distance comparison checks
 	void normalize(); // makes it a unit vector
 	void print();

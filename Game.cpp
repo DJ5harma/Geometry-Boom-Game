@@ -5,6 +5,31 @@
 #include <SFML/Graphics.hpp>
 #include "Components.h"
 
+constexpr auto PI = 3.14159;
+
+inline static int randomInt(int a, int b)
+{
+    static bool seeded = false;
+    if (!seeded)
+    {
+        srand(time(0));  // Seed the random number generator once
+        seeded = true;
+    }
+
+    return a + rand() % (b - a + 1);  // Generate random number between a and b (inclusive)
+}
+inline static float randomFloat(float a, float b)
+{
+    static bool seeded = false;
+    if (!seeded)
+    {
+        srand(time(0));  // Seed the random number generator once
+        seeded = true;
+    }
+
+    return a + static_cast<float>(rand()) / RAND_MAX * (b - a);  // Generate random float between a and b
+}
+
 void Game::init(const std::string& configFile){
 	
 	std::ifstream iFile (configFile);
@@ -80,7 +105,29 @@ void Game::init(const std::string& configFile){
 void Game::run()
 {
     spawnPlayer();
-    sRender();
+    std::cout << m_window.getSize().x << " " << m_window.getSize().y << std::endl;
+
+
+    while (m_window.isOpen())
+    {
+        m_window.clear();
+        sf::Event event;
+        while (m_window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                m_window.close();
+                return;
+            }
+        }
+        sEnemySpawner();
+        sMovement();
+        //std::cout << m_player.get()->cShape->circle.getRadius() << std::endl;
+        //m_window.draw(m_player->cShape->circle);
+
+        sRender();
+        m_window.display();
+    }
 }
 
 void Game::setPaused(bool b)
@@ -89,6 +136,21 @@ void Game::setPaused(bool b)
 
 void Game::sMovement()
 {
+    for (auto& e : m_eManager.getEntities())
+    {
+        e->cShape->circle.rotate(3);
+        vec2 newPos = e->cTransform->pos + e->cTransform->velocity;
+
+        float radius = e->cShape->circle.getRadius();
+
+        if (newPos.x - radius < 0 || newPos.x + radius > m_window.getSize().x) e->cTransform->velocity.x *= -1;
+        if (newPos.y - radius < 0 || newPos.y + radius > m_window.getSize().y) e->cTransform->velocity.y *= -1;
+
+        e->cTransform->pos = newPos;
+
+        e->cShape->circle.setPosition(newPos.x, newPos.y);
+
+    }
 }
 
 void Game::sUserInput()
@@ -101,37 +163,22 @@ void Game::sLifeSpan()
 
 void Game::sRender()
 {
-    //m_window.create(sf::VideoMode(1280, 720), "Geometry Boom Game");
-    sf::CircleShape c = m_player.get()->cShape->circle;
-    while(m_window.isOpen())
-    {   
-        m_window.clear();
-        sf::Event event;
-        while (m_window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed) 
-            {
-                m_window.close();
-                return;
-            }
-        }
-
-        for (auto& e : m_eManager.getEntities())
-        {
-            e->cShape->circle.setPosition(e->cTransform->pos.x, e->cTransform->pos.y);
-            e->cShape->circle.rotate(3);
-            m_window.draw(e->cShape->circle);
-        }
-
-        //std::cout << m_player.get()->cShape->circle.getRadius() << std::endl;
-        //m_window.draw(m_player->cShape->circle);
-        
-        m_window.display();
+    for (auto& e : m_eManager.getEntities()){
+    
+        m_window.draw(e->cShape->circle);
     }
 }
 
 void Game::sEnemySpawner()
 {
+    if (m_lastEnemySpawnTime != enemyConfig.SpawnInterval)
+    {
+        m_lastEnemySpawnTime++;
+        return;
+    }
+
+    m_lastEnemySpawnTime = 0;
+    spawnEnemy();
 }
 
 void Game::sCollision()
@@ -143,10 +190,24 @@ void Game::spawnPlayer()
     
     m_player = m_eManager.addEntity("player");
 
-    m_player->cTransform = std::make_shared<CTransform>(vec2(m_window.getSize().x / 2, m_window.getSize().y / 2), vec2(0, 0), 0);
+    float speed = playerConfig.Speed;
+    
+    float angle = randomInt(0, 360);
+    float radians = (angle * PI) / 180;
+    vec2 velocity(speed * cosf(radians), speed * sinf(radians));
 
-    m_player->cShape = std::make_shared<CShape>(playerConfig.ShapeRadius, playerConfig.ShapeVertices,
-        playerConfig.FillColor, playerConfig.OutlineColor, playerConfig.OutlineThickness);
+    vec2 centerPos(m_window.getSize().x / 2, m_window.getSize().y / 2);
+
+    m_player->cTransform = std::make_shared<CTransform>(centerPos, velocity, 0);
+
+    m_player->cShape = std::make_shared<CShape>
+    (
+        playerConfig.ShapeRadius, 
+        playerConfig.ShapeVertices,
+        playerConfig.FillColor, 
+        playerConfig.OutlineColor, 
+        playerConfig.OutlineThickness
+    );
 
     m_player->cCollision = std::make_shared<CCollision>(playerConfig.CollisionRadius);
 
@@ -157,6 +218,35 @@ void Game::spawnPlayer()
 
 void Game::spawnEnemy()
 {
+    std::shared_ptr<Entity>e = m_eManager.addEntity("enemy");
+
+    float speed = randomFloat(enemyConfig.SpeedMin, enemyConfig.SpeedMax);
+    
+    int radius = enemyConfig.ShapeRadius;
+
+    float angle = randomInt(0, 360);
+    float radians = (angle * PI) / 180;
+    vec2 velocity(speed*cosf(radians), speed*sinf(radians));
+
+    vec2 randomPos(randomFloat(radius, m_window.getSize().x - radius), randomFloat(radius, m_window.getSize().y - radius));
+
+    e->cTransform = std::make_shared<CTransform>(randomPos, velocity, 0);
+
+
+    int vertices = randomInt(enemyConfig.ShapeVerticesMin, enemyConfig.ShapeVerticesMax);
+
+    int R = randomInt(100, 255), G = randomInt(100, 255), B = randomInt(100, 255);
+
+    e->cShape = std::make_shared<CShape>
+    (
+        enemyConfig.ShapeRadius, 
+        vertices, 
+        sf::Color(R, G, B), 
+        enemyConfig.OutlineColor, 
+        enemyConfig.OutlineThickness
+    );
+
+    e->cCollision = std::make_shared<CCollision>(enemyConfig.CollisionRadius);
 }
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)

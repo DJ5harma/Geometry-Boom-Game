@@ -140,6 +140,10 @@
   <ItemGroup>
     <ClInclude Include="vec2.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameConfig.txt" />
+    <Text Include="instructions_for_me.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

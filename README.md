@@ -17,4 +17,5 @@ Otherwise the executable will fail to parse the file and crash.
 WASD & Up Left Down Right supported.
 P : pause the game.
 Left Mouse Click: Shoot
+Right Mouse Click: Use special move after cooldown
 Esc : Exit the game

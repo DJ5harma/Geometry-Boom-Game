@@ -58,6 +58,8 @@ class Game
 	int						m_score = 0;
 	//int						m_currentFrame = 0;
 	int						m_lastEnemySpawnTime = 0;
+	vec2					m_specialPowerCooldown; // {current, maximum (multiplied with window fps)}
+	sf::Text				m_specialPowerCooldownText;
 	bool					m_paused = false;
 	bool					m_running = false;
 
@@ -77,7 +79,7 @@ class Game
 	void spawnEnemy();
 	void spawnSmallEnemies(std::shared_ptr<Entity> e);
 	void spawnBullet(std::shared_ptr<Entity> player, const vec2  &mousePos);
-	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
+	void spawnSpecialPower();
 
 public:
 	void init(const std::string& configFile);

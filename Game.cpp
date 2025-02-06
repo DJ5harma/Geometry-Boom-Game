@@ -68,6 +68,14 @@ void Game::init(const std::string& configFile) {
 	m_scoreText.setFillColor(sf::Color(R, G, B));
 	m_scoreText.setPosition(10, 10);
 
+	// cooldown timer setup
+	m_specialPowerCooldown.x = 0;
+	m_specialPowerCooldown.y = fps * 5;
+	m_specialPowerCooldownText.setFont(m_font);
+	m_specialPowerCooldownText.setCharacterSize(fontSize);
+	m_specialPowerCooldownText.setFillColor(sf::Color(R, G, B));
+	m_specialPowerCooldownText.setPosition(10, 40);
+
 	if (iFile.fail())
 	{
 		std::cerr << "Error reading configuration data" << std::endl;
@@ -110,7 +118,6 @@ void Game::run()
 	spawnPlayer();
 	std::cout << m_window.getSize().x << " " << m_window.getSize().y << std::endl;
 
-
 	while (m_window.isOpen())
 	{
 		m_window.clear();
@@ -138,6 +145,7 @@ void Game::run()
 				auto& ip = m_player->cInput;
 				int key = event.key.code;
 				if (key == sf::Mouse::Left) ip->shoot = true;
+				if (key == sf::Mouse::Right) ip->specialPower = true;
 			}
 		}
 
@@ -214,7 +222,16 @@ void Game::sUserInput()
 		spawnBullet(m_player, mousePos);
 		ip->shoot = false;
 	}
-
+	if (m_specialPowerCooldown.x < m_specialPowerCooldown.y) ++m_specialPowerCooldown.x;
+	if (ip->specialPower)
+	{
+		ip->specialPower = false;
+		if (m_specialPowerCooldown.x >= m_specialPowerCooldown.y)
+		{
+			m_specialPowerCooldown.x = 0;
+			spawnSpecialPower();
+		}
+	}
 }
 
 void Game::sLifeSpan()
@@ -275,7 +292,9 @@ void Game::sLifeSpan()
 void Game::sRender()
 {
 	m_scoreText.setString("Score: "+std::to_string(m_score));
+	m_specialPowerCooldownText.setString("Cooldown: " + std::to_string(m_specialPowerCooldown.x / m_specialPowerCooldown.y));
 	m_window.draw(m_scoreText);
+	m_window.draw(m_specialPowerCooldownText);
 	for (auto& e : m_eManager.getEntities()) {
 
 		m_window.draw(e->cShape->circle);
@@ -445,6 +464,54 @@ void Game::spawnBullet(std::shared_ptr<Entity> srcEty, const vec2& destPos)
 	e->cLifeSpan = std::make_shared<CLifeSpan>(bulletConfig.Lifespan);
 }
 
-void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
+void Game::spawnSpecialPower()
 {
+
+	// horizontal bombardment
+
+	float separation =  m_window.getSize().y / (10.0);
+	vec2 velocity (bulletConfig.Speed, 0);
+	vec2 pos(0.0, separation /2 );
+
+	for (int i = 1; i <= 10; ++i, pos.y += separation)
+	{	
+		std::shared_ptr<Entity>e = m_eManager.addEntity("bullet");
+		//pos.print();
+		e->cTransform = std::make_shared<CTransform>(pos, velocity, 0);
+		e->cShape = std::make_shared<CShape>
+			(
+				bulletConfig.ShapeRadius,
+				bulletConfig.ShapeVertices,
+				bulletConfig.FillColor,
+				bulletConfig.OutlineColor,
+				bulletConfig.OutlineThickness
+			);
+		e->cCollision = std::make_shared<CCollision>(bulletConfig.CollisionRadius);
+		e->cLifeSpan = std::make_shared<CLifeSpan>(bulletConfig.Lifespan);
+	}
+
+	// vertical bombardment
+	separation = m_window.getSize().x / (10.0);
+	pos.x = separation / 2;
+	pos.y = 0.0;
+	velocity.x = 0;
+	velocity.y = bulletConfig.Speed;
+	for (int i = 1; i <= 10; ++i, pos.x += separation)
+	{
+		std::shared_ptr<Entity>e = m_eManager.addEntity("bullet");
+		//pos.print();
+		e->cTransform = std::make_shared<CTransform>(pos, velocity, 0);
+		e->cShape = std::make_shared<CShape>
+			(
+				bulletConfig.ShapeRadius,
+				bulletConfig.ShapeVertices,
+				bulletConfig.FillColor,
+				bulletConfig.OutlineColor,
+				bulletConfig.OutlineThickness
+			);
+		e->cCollision = std::make_shared<CCollision>(bulletConfig.CollisionRadius);
+		e->cLifeSpan = std::make_shared<CLifeSpan>(bulletConfig.Lifespan);
+	}
+
+	return;
 }

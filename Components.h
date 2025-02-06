@@ -64,6 +64,7 @@ public:
 	bool left = false;
 	bool right = false;
 	bool shoot = false;
+	bool specialPower = false;
 
 	CInput(){}
 };
